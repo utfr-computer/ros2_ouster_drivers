@@ -16,13 +16,11 @@
 
 #include <string>
 
-namespace ros2_ouster
-{
+namespace ros2_ouster {
 /**
  * @brief Configuration parameters to send to Ouster lidar
  */
-struct Configuration
-{
+struct Configuration {
   std::string lidar_ip;
   std::string computer_ip;
   int imu_port;
@@ -33,6 +31,6 @@ struct Configuration
   std::string ethernet_device;
 };
 
-}  // namespace ros2_ouster
+} // namespace ros2_ouster
 
-#endif  // ROS2_OUSTER__INTERFACES__CONFIGURATION_HPP_
+#endif // ROS2_OUSTER__INTERFACES__CONFIGURATION_HPP_

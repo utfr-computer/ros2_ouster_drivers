@@ -18,8 +18,7 @@
 #include <string>
 #include <vector>
 
-namespace ros2_ouster
-{
+namespace ros2_ouster {
 
 /**
  * Trims whitespace from the left side of a string
@@ -29,9 +28,8 @@ namespace ros2_ouster
  *
  * @return A reference to the trimmed string
  */
-inline std::string &
-ltrim(std::string & str, const std::string & white = "\t\n\v\f\r ")
-{
+inline std::string &ltrim(std::string &str,
+                          const std::string &white = "\t\n\v\f\r ") {
   str.erase(0, str.find_first_not_of(white));
   return str;
 }
@@ -44,9 +42,8 @@ ltrim(std::string & str, const std::string & white = "\t\n\v\f\r ")
  *
  * @return A reference to the trimmed string
  */
-inline std::string &
-rtrim(std::string & str, const std::string & white = "\t\n\v\f\r ")
-{
+inline std::string &rtrim(std::string &str,
+                          const std::string &white = "\t\n\v\f\r ") {
   str.erase(str.find_last_not_of(white) + 1);
   return str;
 }
@@ -59,9 +56,8 @@ rtrim(std::string & str, const std::string & white = "\t\n\v\f\r ")
  *
  * @return A reference to the trimmed string
  */
-inline std::string &
-trim(std::string & str, const std::string & white = "\t\n\v\f\r ")
-{
+inline std::string &trim(std::string &str,
+                         const std::string &white = "\t\n\v\f\r ") {
   return ros2_ouster::ltrim(ros2_ouster::rtrim(str, white), white);
 }
 
@@ -73,9 +69,7 @@ trim(std::string & str, const std::string & white = "\t\n\v\f\r ")
  *
  * @return A vector of tokens
  */
-inline std::vector<std::string>
-split(const std::string & in, char delim)
-{
+inline std::vector<std::string> split(const std::string &in, char delim) {
   std::vector<std::string> tokens;
   std::string token;
   std::istringstream ss(in);
@@ -87,6 +81,6 @@ split(const std::string & in, char delim)
   return tokens;
 }
 
-}  // namespace ros2_ouster
+} // namespace ros2_ouster
 
-#endif  // ROS2_OUSTER__STRING_UTILS_HPP_
+#endif // ROS2_OUSTER__STRING_UTILS_HPP_

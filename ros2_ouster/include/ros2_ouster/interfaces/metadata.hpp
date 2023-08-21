@@ -14,22 +14,19 @@
 #ifndef ROS2_OUSTER__INTERFACES__METADATA_HPP_
 #define ROS2_OUSTER__INTERFACES__METADATA_HPP_
 
-#include <vector>
-#include <string>
-#include <iostream>
+#include "ros2_ouster/client/client.h"
 #include "ros2_ouster/client/types.h"
 #include "ros2_ouster/client/version.h"
-#include "ros2_ouster/client/client.h"
+#include <iostream>
+#include <string>
+#include <vector>
 
-namespace ros2_ouster
-{
+namespace ros2_ouster {
 /**
  * @brief metadata about Ouster lidar sensor, inherited from client sensor_info.
  */
-struct Metadata : ouster::sensor::sensor_info
-{
-  Metadata()
-  {
+struct Metadata : ouster::sensor::sensor_info {
+  Metadata() {
     name = "UNKNOWN";
     sn = "UNKNOWN";
     fw_rev = "UNKNOWN";
@@ -46,13 +43,10 @@ struct Metadata : ouster::sensor::sensor_info
     imu_port = 0;
     lidar_port = 0;
   }
-  Metadata(
-    const ouster::sensor::sensor_info & info, int _imu_port,
-    int _lidar_port, const std::string & _timestamp_mode)
-  : imu_port(_imu_port),
-    lidar_port(_lidar_port),
-    timestamp_mode(_timestamp_mode)
-  {
+  Metadata(const ouster::sensor::sensor_info &info, int _imu_port,
+           int _lidar_port, const std::string &_timestamp_mode)
+      : imu_port(_imu_port), lidar_port(_lidar_port),
+        timestamp_mode(_timestamp_mode) {
     name = info.name;
     sn = info.sn;
     fw_rev = info.fw_rev;
@@ -71,12 +65,11 @@ struct Metadata : ouster::sensor::sensor_info
   int lidar_port;
 };
 
-
 /**
  * @brief fill in values that could not be parsed from metadata.
  */
-inline void populate_missing_metadata_defaults(ouster::sensor::sensor_info & info)
-{
+inline void
+populate_missing_metadata_defaults(ouster::sensor::sensor_info &info) {
   if (info.name.empty()) {
     info.name = "UNKNOWN";
   }
@@ -99,6 +92,6 @@ inline void populate_missing_metadata_defaults(ouster::sensor::sensor_info & inf
   }
 }
 
-}  // namespace ros2_ouster
+} // namespace ros2_ouster
 
-#endif  // ROS2_OUSTER__INTERFACES__METADATA_HPP_
+#endif // ROS2_OUSTER__INTERFACES__METADATA_HPP_

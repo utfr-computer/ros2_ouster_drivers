@@ -14,28 +14,26 @@
 #ifndef ROS2_OUSTER__EXCEPTION_HPP_
 #define ROS2_OUSTER__EXCEPTION_HPP_
 
+#include <memory>
 #include <stdexcept>
 #include <string>
-#include <memory>
 
-namespace ros2_ouster
-{
+namespace ros2_ouster {
 
 /**
  * @class OusterDriverException
  * @brief Thrown when Ouster lidar driver encounters a fatal error
  */
-class OusterDriverException : public std::runtime_error
-{
+class OusterDriverException : public std::runtime_error {
 public:
   /**
    * @brief A constructor for ros2_ouster::OusterDriverException
    * @param description string to display the exception message
    */
   explicit OusterDriverException(const std::string description)
-  : std::runtime_error(description) {}
+      : std::runtime_error(description) {}
 };
 
-}  // namespace ros2_ouster
+} // namespace ros2_ouster
 
-#endif  // ROS2_OUSTER__EXCEPTION_HPP_
+#endif // ROS2_OUSTER__EXCEPTION_HPP_

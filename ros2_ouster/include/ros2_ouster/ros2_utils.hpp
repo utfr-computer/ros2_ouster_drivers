@@ -15,11 +15,10 @@
 #ifndef ROS2_OUSTER__ROS2_UTILS_HPP_
 #define ROS2_OUSTER__ROS2_UTILS_HPP_
 
-#include <string>
 #include "rclcpp/rclcpp.hpp"
+#include <string>
 
-namespace ros2_ouster
-{
+namespace ros2_ouster {
 
 /**
  * @brief Declares static ROS2 parameter and sets it to a given value if it was
@@ -29,16 +28,13 @@ namespace ros2_ouster
  * @param[in] node_ptr A node in which given parameter to be declared
  * @param[in] param_name The name of parameter
  */
-template<typename NodeTypePtr>
-void declare_parameter_if_not_declared(
-  NodeTypePtr node_ptr,
-  const std::string & param_name)
-{
+template <typename NodeTypePtr>
+void declare_parameter_if_not_declared(NodeTypePtr node_ptr,
+                                       const std::string &param_name) {
   if (!node_ptr->has_parameter(param_name)) {
     node_ptr->declare_parameter(param_name);
   }
 }
-
 
 /**
  * @brief Declares static ROS2 parameter and sets it to a given value if it was
@@ -50,19 +46,18 @@ void declare_parameter_if_not_declared(
  * @param[in] default_value Parameter value to initialize with
  * @param[in] parameter_descriptor Parameter descriptor (optional)
  */
-template<typename NodeTypePtr>
+template <typename NodeTypePtr>
 void declare_parameter_if_not_declared(
-  NodeTypePtr node_ptr,
-  const std::string & param_name,
-  const rclcpp::ParameterValue & default_value,
-  const rcl_interfaces::msg::ParameterDescriptor & parameter_descriptor =
-  rcl_interfaces::msg::ParameterDescriptor())
-{
+    NodeTypePtr node_ptr, const std::string &param_name,
+    const rclcpp::ParameterValue &default_value,
+    const rcl_interfaces::msg::ParameterDescriptor &parameter_descriptor =
+        rcl_interfaces::msg::ParameterDescriptor()) {
   if (!node_ptr->has_parameter(param_name)) {
-    node_ptr->declare_parameter(param_name, default_value, parameter_descriptor);
+    node_ptr->declare_parameter(param_name, default_value,
+                                parameter_descriptor);
   }
 }
 
-}  // namespace ros2_ouster
+} // namespace ros2_ouster
 
-#endif  // ROS2_OUSTER__ROS2_UTILS_HPP_
+#endif // ROS2_OUSTER__ROS2_UTILS_HPP_

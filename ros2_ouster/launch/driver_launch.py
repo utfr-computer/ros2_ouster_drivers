@@ -32,25 +32,27 @@ import os
 
 
 def generate_launch_description():
-    share_dir = get_package_share_directory('ros2_ouster')
-    parameter_file = LaunchConfiguration('params_file')
-    node_name = 'ouster_driver'
+    share_dir = get_package_share_directory("ros2_ouster")
+    parameter_file = LaunchConfiguration("params_file")
+    node_name = "ouster_driver"
 
     # Acquire the driver param file
-    params_declare = DeclareLaunchArgument('params_file',
-                                           default_value=os.path.join(
-                                               share_dir, 'params', 'driver_config.yaml'),
-                                           description='FPath to the ROS2 parameters file to use.')
+    params_declare = DeclareLaunchArgument(
+        "params_file",
+        default_value=os.path.join(share_dir, "params", "driver_config.yaml"),
+        description="FPath to the ROS2 parameters file to use.",
+    )
 
-    driver_node = LifecycleNode(package='ros2_ouster',
-                                executable='ouster_driver',
-                                name=node_name,
-                                output='screen',
-                                emulate_tty=True,
-                                parameters=[parameter_file],
-                                arguments=['--ros-args', '--log-level', 'INFO'],
-                                namespace='/',
-                                )
+    driver_node = LifecycleNode(
+        package="ros2_ouster",
+        executable="ouster_driver",
+        name=node_name,
+        output="screen",
+        emulate_tty=True,
+        parameters=[parameter_file],
+        arguments=["--ros-args", "--log-level", "INFO"],
+        namespace="/",
+    )
 
     configure_event = EmitEvent(
         event=ChangeState(
@@ -61,14 +63,16 @@ def generate_launch_description():
 
     activate_event = RegisterEventHandler(
         OnStateTransition(
-            target_lifecycle_node=driver_node, goal_state='inactive',
+            target_lifecycle_node=driver_node,
+            goal_state="inactive",
             entities=[
-                LogInfo(
-                    msg="[LifecycleLaunch] Ouster driver node is activating."),
-                EmitEvent(event=ChangeState(
-                    lifecycle_node_matcher=matches_action(driver_node),
-                    transition_id=lifecycle_msgs.msg.Transition.TRANSITION_ACTIVATE,
-                )),
+                LogInfo(msg="[LifecycleLaunch] Ouster driver node is activating."),
+                EmitEvent(
+                    event=ChangeState(
+                        lifecycle_node_matcher=matches_action(driver_node),
+                        transition_id=lifecycle_msgs.msg.Transition.TRANSITION_ACTIVATE,
+                    )
+                ),
             ],
         )
     )
@@ -77,20 +81,23 @@ def generate_launch_description():
     shutdown_event = RegisterEventHandler(
         OnShutdown(
             on_shutdown=[
-                EmitEvent(event=ChangeState(
-                  lifecycle_node_matcher=matches_node_name(node_name=node_name),
-                  transition_id=lifecycle_msgs.msg.Transition.TRANSITION_ACTIVE_SHUTDOWN,
-                )),
-                LogInfo(
-                    msg="[LifecycleLaunch] Ouster driver node is exiting."),
+                EmitEvent(
+                    event=ChangeState(
+                        lifecycle_node_matcher=matches_node_name(node_name=node_name),
+                        transition_id=lifecycle_msgs.msg.Transition.TRANSITION_ACTIVE_SHUTDOWN,
+                    )
+                ),
+                LogInfo(msg="[LifecycleLaunch] Ouster driver node is exiting."),
             ],
         )
     )
 
-    return LaunchDescription([
-        params_declare,
-        driver_node,
-        activate_event,
-        configure_event,
-        shutdown_event,
-    ])
+    return LaunchDescription(
+        [
+            params_declare,
+            driver_node,
+            activate_event,
+            configure_event,
+            shutdown_event,
+        ]
+    )

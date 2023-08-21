@@ -16,19 +16,17 @@
 
 #include <memory>
 
-#include "ros2_ouster/interfaces/metadata.hpp"
+#include "ros2_ouster/client/client.h"
 #include "ros2_ouster/interfaces/configuration.hpp"
 #include "ros2_ouster/interfaces/data_processor_interface.hpp"
-#include "ros2_ouster/client/client.h"
+#include "ros2_ouster/interfaces/metadata.hpp"
 
-namespace ros2_ouster
-{
+namespace ros2_ouster {
 /**
  * @class ros2_ouster::SensorInterface
  * @brief An interface for lidars units
  */
-class SensorInterface
-{
+class SensorInterface {
 public:
   using SharedPtr = std::shared_ptr<SensorInterface>;
   using Ptr = std::unique_ptr<SensorInterface>;
@@ -45,29 +43,27 @@ public:
 
   // copy
   SensorInterface(const SensorInterface &) = delete;
-  SensorInterface & operator=(const SensorInterface &) = delete;
+  SensorInterface &operator=(const SensorInterface &) = delete;
 
   // move
   SensorInterface(SensorInterface &&) = default;
-  SensorInterface & operator=(SensorInterface &&) = default;
+  SensorInterface &operator=(SensorInterface &&) = default;
 
   /**
    * @brief Reset lidar sensor
    * @param configuration file to use
    * @param node pointer to the driver node, which provides access to ROS params
    */
-  virtual void reset(
-    ros2_ouster::Configuration & config,
-    rclcpp_lifecycle::LifecycleNode::SharedPtr node) = 0;
+  virtual void reset(ros2_ouster::Configuration &config,
+                     rclcpp_lifecycle::LifecycleNode::SharedPtr node) = 0;
 
   /**
    * @brief Configure lidar sensor
    * @param configuration file to use
    * @param node pointer to the driver node, which provides access to ROS params
    */
-  virtual void configure(
-    ros2_ouster::Configuration & config,
-    rclcpp_lifecycle::LifecycleNode::SharedPtr node) = 0;
+  virtual void configure(ros2_ouster::Configuration &config,
+                         rclcpp_lifecycle::LifecycleNode::SharedPtr node) = 0;
 
   /**
    * @brief Ask sensor to get its current state for data collection
@@ -78,18 +74,22 @@ public:
   /**
    * @brief reading a lidar packet
    * @param state of the sensor
-   * @param buf pointer to a buffer to hold the packet data. Must hold getPacketFormat().lidar_packet_size bytes.
+   * @param buf pointer to a buffer to hold the packet data. Must hold
+   * getPacketFormat().lidar_packet_size bytes.
    * @return true if a packet was recieved, false otherwise
    */
-  virtual bool readLidarPacket(const ouster::sensor::client_state & state, uint8_t * buf) = 0;
+  virtual bool readLidarPacket(const ouster::sensor::client_state &state,
+                               uint8_t *buf) = 0;
 
   /**
    * @brief reading an imu packet
    * @param state of the sensor
-   * @param buf pointer to a buffer to hold the packet data. Must hold getPacketFormat().imu_packet_size bytes.
+   * @param buf pointer to a buffer to hold the packet data. Must hold
+   * getPacketFormat().imu_packet_size bytes.
    * @return true if a packet was recieved, false otherwise
    */
-  virtual bool readImuPacket(const ouster::sensor::client_state & state, uint8_t * buf) = 0;
+  virtual bool readImuPacket(const ouster::sensor::client_state &state,
+                             uint8_t *buf) = 0;
 
   /**
    * @brief Get lidar sensor's metadata
@@ -104,6 +104,6 @@ public:
   virtual ouster::sensor::packet_format getPacketFormat() = 0;
 };
 
-}  // namespace ros2_ouster
+} // namespace ros2_ouster
 
-#endif  // ROS2_OUSTER__INTERFACES__SENSOR_INTERFACE_HPP_
+#endif // ROS2_OUSTER__INTERFACES__SENSOR_INTERFACE_HPP_

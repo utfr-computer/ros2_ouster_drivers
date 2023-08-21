@@ -14,10 +14,10 @@
 #ifndef ROS2_OUSTER__CONVERSIONS_HPP_
 #define ROS2_OUSTER__CONVERSIONS_HPP_
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #include "pcl/point_cloud.h"
 #include "pcl/point_types.h"
@@ -30,22 +30,20 @@
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "tf2/LinearMath/Transform.h"
 #ifdef TF2_CPP_HEADERS
-  #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #else
-  #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #endif
 
 #include "ouster_msgs/msg/metadata.hpp"
 
 #include "ros2_ouster/client/client.h"
 
-namespace ros2_ouster
-{
+namespace ros2_ouster {
 /**
  * @brief Convert ClientState to string
  */
-inline std::string toString(const ouster::sensor::client_state & state)
-{
+inline std::string toString(const ouster::sensor::client_state &state) {
   std::ostringstream output;
 
   if (state & ouster::sensor::client_state::TIMEOUT) {
@@ -73,24 +71,25 @@ inline std::string toString(const ouster::sensor::client_state & state)
 /**
  * @brief Converts a 4dMatrix into a Vector
  */
-static std::vector<double> toVector(const Eigen::Matrix<double, 4, 4, Eigen::DontAlign> & mat)
-{
+static std::vector<double>
+toVector(const Eigen::Matrix<double, 4, 4, Eigen::DontAlign> &mat) {
   return std::vector<double>(mat.data(), mat.data() + mat.rows() * mat.cols());
 }
 
 /**
  * @brief Convert metadata to message format
  */
-inline ouster_msgs::msg::Metadata toMsg(const ros2_ouster::Metadata & mdata)
-{
+inline ouster_msgs::msg::Metadata toMsg(const ros2_ouster::Metadata &mdata) {
   ouster_msgs::msg::Metadata msg;
   msg.hostname = mdata.name;
   msg.lidar_mode = ouster::sensor::to_string(mdata.mode);
   msg.timestamp_mode = mdata.timestamp_mode;
   msg.beam_azimuth_angles = mdata.beam_azimuth_angles;
   msg.beam_altitude_angles = mdata.beam_altitude_angles;
-  msg.imu_to_sensor_transform = ros2_ouster::toVector(mdata.imu_to_sensor_transform);
-  msg.lidar_to_sensor_transform = ros2_ouster::toVector(mdata.lidar_to_sensor_transform);
+  msg.imu_to_sensor_transform =
+      ros2_ouster::toVector(mdata.imu_to_sensor_transform);
+  msg.lidar_to_sensor_transform =
+      ros2_ouster::toVector(mdata.lidar_to_sensor_transform);
   msg.serial_no = mdata.sn;
   msg.firmware_rev = mdata.fw_rev;
   msg.imu_port = mdata.imu_port;
@@ -101,21 +100,17 @@ inline ouster_msgs::msg::Metadata toMsg(const ros2_ouster::Metadata & mdata)
 /**
  * @brief Convert transformation to message format
  */
-inline geometry_msgs::msg::TransformStamped toMsg(
-  const Eigen::Matrix<double, 4, 4, Eigen::DontAlign> & mat, const std::string & frame,
-  const std::string & child_frame, const rclcpp::Time & time)
-{
+inline geometry_msgs::msg::TransformStamped
+toMsg(const Eigen::Matrix<double, 4, 4, Eigen::DontAlign> &mat,
+      const std::string &frame, const std::string &child_frame,
+      const rclcpp::Time &time) {
   assert(mat.size() == 16);
 
   tf2::Transform tf;
 
   tf.setOrigin({mat(3) / 1e3, mat(7) / 1e3, mat(11) / 1e3});
-  tf.setBasis(
-    {
-      mat(0), mat(1), mat(2),
-      mat(4), mat(5), mat(6),
-      mat(8), mat(9), mat(10)
-    });
+  tf.setBasis({mat(0), mat(1), mat(2), mat(4), mat(5), mat(6), mat(8), mat(9),
+               mat(10)});
 
   geometry_msgs::msg::TransformStamped msg;
   msg.header.stamp = time;
@@ -132,12 +127,9 @@ inline geometry_msgs::msg::TransformStamped toMsg(
  * @param frame the frame to set in the resulting ROS message
  * @return ROS sensor message with fields populated from the packet
  */
-inline sensor_msgs::msg::Imu toMsg(
-  const uint8_t * buf,
-  const std::string & frame,
-  const ouster::sensor::packet_format & pf,
-  const uint64_t override_ts = 0)
-{
+inline sensor_msgs::msg::Imu toMsg(const uint8_t *buf, const std::string &frame,
+                                   const ouster::sensor::packet_format &pf,
+                                   const uint64_t override_ts = 0) {
   const double standard_g = 9.80665;
   sensor_msgs::msg::Imu m;
   m.orientation.x = 0;
@@ -145,7 +137,8 @@ inline sensor_msgs::msg::Imu toMsg(
   m.orientation.z = 0;
   m.orientation.w = 1;
 
-  m.header.stamp = override_ts == 0 ? rclcpp::Time(pf.imu_gyro_ts(buf)) : rclcpp::Time(override_ts);
+  m.header.stamp = override_ts == 0 ? rclcpp::Time(pf.imu_gyro_ts(buf))
+                                    : rclcpp::Time(override_ts);
   m.header.frame_id = frame;
 
   m.linear_acceleration.x = pf.imu_la_x(buf) * standard_g;
@@ -191,30 +184,25 @@ inline sensor_msgs::msg::Imu toMsg(
  * @return A ROS `PointCloud2` message of LiDAR data whose memory buffer is
  *         row-major ordered consistent to the shape of the LiDAR array.
  */
-inline sensor_msgs::msg::PointCloud2 toMsg(
-  const pcl::PointCloud<ouster_ros::Point> & cloud,
-  const std::chrono::nanoseconds timestamp,
-  const std::string & frame,
-  const uint64_t override_ts)
-{
+inline sensor_msgs::msg::PointCloud2
+toMsg(const pcl::PointCloud<ouster_ros::Point> &cloud,
+      const std::chrono::nanoseconds timestamp, const std::string &frame,
+      const uint64_t override_ts) {
   sensor_msgs::msg::PointCloud2 msg{};
   pcl::toROSMsg(cloud, msg);
   msg.header.frame_id = frame;
-  msg.header.stamp = override_ts == 0 ? rclcpp::Time(timestamp.count()) : rclcpp::Time(override_ts);
+  msg.header.stamp = override_ts == 0 ? rclcpp::Time(timestamp.count())
+                                      : rclcpp::Time(override_ts);
   return msg;
 }
 
 /**
  * @brief Convert cloud to scan message format
  */
-inline sensor_msgs::msg::LaserScan toMsg(
-  const ouster::LidarScan ls,
-  const std::chrono::nanoseconds timestamp,
-  const std::string & frame,
-  const ouster::sensor::sensor_info & mdata,
-  const uint8_t ring_to_use,
-  const uint64_t override_ts)
-{
+inline sensor_msgs::msg::LaserScan
+toMsg(const ouster::LidarScan ls, const std::chrono::nanoseconds timestamp,
+      const std::string &frame, const ouster::sensor::sensor_info &mdata,
+      const uint8_t ring_to_use, const uint64_t override_ts) {
   sensor_msgs::msg::LaserScan msg;
   rclcpp::Time t(timestamp.count());
   msg.header.stamp = override_ts == 0 ? t : rclcpp::Time(override_ts);
@@ -225,37 +213,36 @@ inline sensor_msgs::msg::LaserScan toMsg(
   msg.range_max = 120.0;
 
   msg.scan_time = 1.0 / ouster::sensor::frequency_of_lidar_mode(mdata.mode);
-  msg.time_increment = 1.0 / ouster::sensor::frequency_of_lidar_mode(mdata.mode) /
-    ouster::sensor::n_cols_of_lidar_mode(mdata.mode);
-  msg.angle_increment = 2 * M_PI / ouster::sensor::n_cols_of_lidar_mode(mdata.mode);
+  msg.time_increment = 1.0 /
+                       ouster::sensor::frequency_of_lidar_mode(mdata.mode) /
+                       ouster::sensor::n_cols_of_lidar_mode(mdata.mode);
+  msg.angle_increment =
+      2 * M_PI / ouster::sensor::n_cols_of_lidar_mode(mdata.mode);
 
-  // Fix #90 (PR #92) - The iterator is in the loop condition to prevent overflow by
-  // decrementing unsigned variable 'i' bellow 0. This happened when ring 0 was selected
-  // due to the condition being reduced to i >= 0
+  // Fix #90 (PR #92) - The iterator is in the loop condition to prevent
+  // overflow by decrementing unsigned variable 'i' bellow 0. This happened when
+  // ring 0 was selected due to the condition being reduced to i >= 0
   for (size_t i = ls.w * ring_to_use + ls.w; i-- > ls.w * ring_to_use;) {
-    msg.ranges.push_back(
-      static_cast<float>((ls.field(ouster::LidarScan::RANGE)(i) * ouster::sensor::range_unit))
-    );
+    msg.ranges.push_back(static_cast<float>(
+        (ls.field(ouster::LidarScan::RANGE)(i) * ouster::sensor::range_unit)));
     msg.intensities.push_back(
-      static_cast<float>((ls.field(ouster::LidarScan::INTENSITY)(i)))
-    );
+        static_cast<float>((ls.field(ouster::LidarScan::INTENSITY)(i))));
   }
 
   return msg;
 }
 
 /**
-* Populate a PCL point cloud from a LidarScan
-* @param xyz_lut lookup table from sensor beam angles (see lidar_scan.h)
-* @param scan_ts scan start used to caluclate relative timestamps for points
-* @param ls input lidar data
-* @param cloud output pcl pointcloud to populate
-*/
-static void toCloud(
-  const ouster::XYZLut & xyz_lut,
-  ouster::LidarScan::ts_t scan_ts,
-  const ouster::LidarScan & ls, pcl::PointCloud<ouster_ros::Point> & cloud)
-{
+ * Populate a PCL point cloud from a LidarScan
+ * @param xyz_lut lookup table from sensor beam angles (see lidar_scan.h)
+ * @param scan_ts scan start used to caluclate relative timestamps for points
+ * @param ls input lidar data
+ * @param cloud output pcl pointcloud to populate
+ */
+static void toCloud(const ouster::XYZLut &xyz_lut,
+                    ouster::LidarScan::ts_t scan_ts,
+                    const ouster::LidarScan &ls,
+                    pcl::PointCloud<ouster_ros::Point> &cloud) {
   cloud.resize(ls.w * ls.h);
   auto points = ouster::cartesian(ls, xyz_lut);
 
@@ -265,19 +252,18 @@ static void toCloud(
       const auto pix = ls.data.row(u * ls.w + v);
       const auto ts = (ls.header(v).timestamp - scan_ts).count();
       cloud(v, u) = ouster_ros::Point{
-        {{static_cast<float>(xyz(0)),
-          static_cast<float>(xyz(1)),
-          static_cast<float>(xyz(2)), 1.0f}},
-        static_cast<float>(pix(ouster::LidarScan::INTENSITY)),
-        static_cast<uint32_t>(ts),
-        static_cast<uint16_t>(pix(ouster::LidarScan::REFLECTIVITY)),
-        static_cast<uint8_t>(u),
-        static_cast<uint16_t>(pix(ouster::LidarScan::AMBIENT)),
-        static_cast<uint32_t>(pix(ouster::LidarScan::RANGE))};
+          {{static_cast<float>(xyz(0)), static_cast<float>(xyz(1)),
+            static_cast<float>(xyz(2)), 1.0f}},
+          static_cast<float>(pix(ouster::LidarScan::INTENSITY)),
+          static_cast<uint32_t>(ts),
+          static_cast<uint16_t>(pix(ouster::LidarScan::REFLECTIVITY)),
+          static_cast<uint8_t>(u),
+          static_cast<uint16_t>(pix(ouster::LidarScan::AMBIENT)),
+          static_cast<uint32_t>(pix(ouster::LidarScan::RANGE))};
     }
   }
 }
 
-}  // namespace ros2_ouster
+} // namespace ros2_ouster
 
-#endif  // ROS2_OUSTER__CONVERSIONS_HPP_
+#endif // ROS2_OUSTER__CONVERSIONS_HPP_

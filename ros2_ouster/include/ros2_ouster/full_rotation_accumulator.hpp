@@ -22,43 +22,36 @@
 
 #include "ros2_ouster/exception.hpp"
 
-namespace sensor
-{
+namespace sensor {
 /**
  * @class sensor::FullRotationAccumulator
  * @brief The FullRotationAccumulator creates LidarScan for the processors from
  * packet data.
  */
-class FullRotationAccumulator
-{
+class FullRotationAccumulator {
 public:
-  FullRotationAccumulator(
-    const ouster::sensor::sensor_info & mdata,
-    const ouster::sensor::packet_format & pf)
-  : _batchReady(false), _pf(pf), _packets_accumulated(0)
-  {
-    _batch = std::make_unique<ouster::ScanBatcher>(mdata.format.columns_per_frame, _pf);
-    _ls = std::make_shared<ouster::LidarScan>(
-      ouster::LidarScan{mdata.format.columns_per_frame,
-        mdata.format.pixels_per_column});
+  FullRotationAccumulator(const ouster::sensor::sensor_info &mdata,
+                          const ouster::sensor::packet_format &pf)
+      : _batchReady(false), _pf(pf), _packets_accumulated(0) {
+    _batch = std::make_unique<ouster::ScanBatcher>(
+        mdata.format.columns_per_frame, _pf);
+    _ls = std::make_shared<ouster::LidarScan>(ouster::LidarScan{
+        mdata.format.columns_per_frame, mdata.format.pixels_per_column});
   }
 
   /**
    * @brief Returns true if the lidarscan is ready
    */
-  bool isBatchReady()
-  {
-    return _batchReady;
-  }
+  bool isBatchReady() { return _batchReady; }
 
   /**
    * @brief Returns the ready lidarscan. If the lidarscan is not ready it will
    * throw an exception
    */
-  std::shared_ptr<ouster::LidarScan> getLidarScan()
-  {
+  std::shared_ptr<ouster::LidarScan> getLidarScan() {
     if (!_batchReady) {
-      throw ros2_ouster::OusterDriverException("Full rotation not accumulated.");
+      throw ros2_ouster::OusterDriverException(
+          "Full rotation not accumulated.");
     }
 
     return _ls;
@@ -68,10 +61,10 @@ public:
    * @brief Returns the ready timestamp. If the timestamp is not ready it will
    * throw an exception
    */
-  std::chrono::nanoseconds getTimestamp()
-  {
+  std::chrono::nanoseconds getTimestamp() {
     if (!_batchReady) {
-      throw ros2_ouster::OusterDriverException("Full rotation not accumulated.");
+      throw ros2_ouster::OusterDriverException(
+          "Full rotation not accumulated.");
     }
 
     return _timestamp;
@@ -80,8 +73,7 @@ public:
   /**
    * @brief Takes packet data to batch it into a lidarscan
    */
-  void accumulate(const uint8_t * data, uint64_t override_ts)
-  {
+  void accumulate(const uint8_t *data, uint64_t override_ts) {
     if (_batchReady) {
       _batchReady = false;
       _packets_accumulated = 0;
@@ -90,10 +82,10 @@ public:
     _packets_accumulated++;
 
     if (_batch->operator()(data, *_ls)) {
-      auto h = std::find_if(
-        _ls->headers.begin(), _ls->headers.end(), [](const auto & h) {
-          return h.timestamp != std::chrono::nanoseconds{0};
-        });
+      auto h = std::find_if(_ls->headers.begin(), _ls->headers.end(),
+                            [](const auto &h) {
+                              return h.timestamp != std::chrono::nanoseconds{0};
+                            });
       if (h != _ls->headers.end()) {
         _timestamp = h->timestamp;
       }
@@ -101,10 +93,7 @@ public:
     }
   }
 
-  uint64_t getPacketsAccumulated()
-  {
-    return _packets_accumulated;
-  }
+  uint64_t getPacketsAccumulated() { return _packets_accumulated; }
 
 private:
   bool _batchReady;
@@ -116,6 +105,6 @@ private:
   uint64_t _packets_accumulated = 0;
 };
 
-}  // namespace sensor
+} // namespace sensor
 
-#endif  // ROS2_OUSTER__FULL_ROTATION_ACCUMULATOR_HPP_
+#endif // ROS2_OUSTER__FULL_ROTATION_ACCUMULATOR_HPP_

@@ -14,10 +14,10 @@
 #ifndef ROS2_OUSTER__PROCESSORS__POINTCLOUD_PROCESSOR_HPP_
 #define ROS2_OUSTER__PROCESSORS__POINTCLOUD_PROCESSOR_HPP_
 
-#include <vector>
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "rclcpp/qos.hpp"
 
@@ -28,21 +28,19 @@
 #include "ros2_ouster/client/client.h"
 #include "ros2_ouster/client/lidar_scan.h"
 #include "ros2_ouster/client/point.h"
-#include "ros2_ouster/interfaces/data_processor_interface.hpp"
 #include "ros2_ouster/full_rotation_accumulator.hpp"
+#include "ros2_ouster/interfaces/data_processor_interface.hpp"
 
 using Cloud = pcl::PointCloud<ouster_ros::Point>;
 
-namespace sensor
-{
+namespace sensor {
 /**
  * @class sensor::PointcloudProcessor
  * @brief A data processor interface implementation of a processor
  * for creating Pointclouds in the
  * driver in ROS2.
  */
-class PointcloudProcessor : public ros2_ouster::DataProcessorInterface
-{
+class PointcloudProcessor : public ros2_ouster::DataProcessorInterface {
 public:
   /**
    * @brief A constructor for sensor::PointcloudProcessor
@@ -51,14 +49,11 @@ public:
    * @param frame frame_id to use for messages
    */
   PointcloudProcessor(
-    const rclcpp_lifecycle::LifecycleNode::SharedPtr node,
-    const ouster::sensor::sensor_info & mdata,
-    const std::string & frame,
-    const rclcpp::QoS & qos,
-    const ouster::sensor::packet_format & pf,
-    std::shared_ptr<sensor::FullRotationAccumulator> fullRotationAccumulator)
-  : DataProcessorInterface(), _node(node), _frame(frame)
-  {
+      const rclcpp_lifecycle::LifecycleNode::SharedPtr node,
+      const ouster::sensor::sensor_info &mdata, const std::string &frame,
+      const rclcpp::QoS &qos, const ouster::sensor::packet_format &pf,
+      std::shared_ptr<sensor::FullRotationAccumulator> fullRotationAccumulator)
+      : DataProcessorInterface(), _node(node), _frame(frame) {
     _node->declare_parameter("pointcloud_filter_zero_points", false);
     _node->get_parameter("pointcloud_filter_zero_points", _filter_zero_points);
 
@@ -68,38 +63,33 @@ public:
     _xyz_lut = ouster::make_xyz_lut(mdata);
     _cloud = std::make_unique<Cloud>(_width, _height);
     _cloud_filtered = _filter_zero_points
-      ? std::make_unique<Cloud>(_width * _height, 1)
-      : nullptr;
-    _pub = _node->create_publisher<sensor_msgs::msg::PointCloud2>(
-      "points", qos);
+                          ? std::make_unique<Cloud>(_width * _height, 1)
+                          : nullptr;
+    _pub =
+        _node->create_publisher<sensor_msgs::msg::PointCloud2>("points", qos);
   }
 
   /**
    * @brief A destructor clearing memory allocated
    */
-  ~PointcloudProcessor()
-  {
-    _pub.reset();
-  }
+  ~PointcloudProcessor() { _pub.reset(); }
 
   /**
    * @brief Process method to create pointcloud
    * @param data the packet data
    */
-  bool process(const uint8_t * data, const uint64_t override_ts) override
-  {
+  bool process(const uint8_t *data, const uint64_t override_ts) override {
     if (!_fullRotationAccumulator->isBatchReady()) {
       return true;
     }
 
-    ros2_ouster::toCloud(
-      _xyz_lut, _fullRotationAccumulator->getTimestamp(),
-      *_fullRotationAccumulator->getLidarScan(), *_cloud);
+    ros2_ouster::toCloud(_xyz_lut, _fullRotationAccumulator->getTimestamp(),
+                         *_fullRotationAccumulator->getLidarScan(), *_cloud);
 
     if (_filter_zero_points) {
       _cloud_filtered->points.clear();
 
-      for (const auto & p : _cloud->points) {
+      for (const auto &p : _cloud->points) {
         if (p.x == 0.0 && p.y == 0.0 && p.z == 0.0) {
           continue;
         }
@@ -110,16 +100,14 @@ public:
       _cloud_filtered->height = 1;
     }
 
-    _pub->publish(
-      ros2_ouster::toMsg(
+    _pub->publish(ros2_ouster::toMsg(
         *(_filter_zero_points ? _cloud_filtered : _cloud),
-        _fullRotationAccumulator->getTimestamp(),
-        _frame, override_ts));
+        _fullRotationAccumulator->getTimestamp(), _frame, override_ts));
 
     RCLCPP_DEBUG(
-      _node->get_logger(),
-      "\n\nCloud published with %s packets\n",
-      std::to_string(_fullRotationAccumulator->getPacketsAccumulated()).c_str());
+        _node->get_logger(), "\n\nCloud published with %s packets\n",
+        std::to_string(_fullRotationAccumulator->getPacketsAccumulated())
+            .c_str());
 
     return true;
   }
@@ -127,24 +115,19 @@ public:
   /**
    * @brief Activating processor from lifecycle state transitions
    */
-  void onActivate() override
-  {
-    _pub->on_activate();
-  }
+  void onActivate() override { _pub->on_activate(); }
 
   /**
    * @brief Deactivating processor from lifecycle state transitions
    */
-  void onDeactivate() override
-  {
-    _pub->on_deactivate();
-  }
+  void onDeactivate() override { _pub->on_deactivate(); }
 
 private:
   std::unique_ptr<Cloud> _cloud;
   std::unique_ptr<Cloud> _cloud_filtered;
   bool _filter_zero_points;
-  rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr _pub;
+  rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr
+      _pub;
   rclcpp_lifecycle::LifecycleNode::SharedPtr _node;
   ouster::XYZLut _xyz_lut;
   std::string _frame;
@@ -153,6 +136,6 @@ private:
   std::shared_ptr<sensor::FullRotationAccumulator> _fullRotationAccumulator;
 };
 
-}  // namespace sensor
+} // namespace sensor
 
-#endif  // ROS2_OUSTER__PROCESSORS__POINTCLOUD_PROCESSOR_HPP_
+#endif // ROS2_OUSTER__PROCESSORS__POINTCLOUD_PROCESSOR_HPP_

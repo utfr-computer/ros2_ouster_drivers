@@ -16,8 +16,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "ros2_ouster/driver_types.hpp"
 
-int main(int argc, char ** argv)
-{
+int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
   auto options = rclcpp::NodeOptions();
 

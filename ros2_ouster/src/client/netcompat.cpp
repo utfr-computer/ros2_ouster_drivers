@@ -17,26 +17,22 @@
 
 #endif
 
-namespace ouster
-{
-namespace impl
-{
+namespace ouster {
+namespace impl {
 
 #ifdef _WIN32
-struct StaticWrapper
-{
+struct StaticWrapper {
   WSADATA wsa_data;
 
-  StaticWrapper() {WSAStartup(MAKEWORD(1, 1), &wsa_data);}
+  StaticWrapper() { WSAStartup(MAKEWORD(1, 1), &wsa_data); }
 
-  ~StaticWrapper() {WSACleanup();}
+  ~StaticWrapper() { WSACleanup(); }
 };
 
 static StaticWrapper resources = {};
 #endif
 
-int socket_close(SOCKET sock)
-{
+int socket_close(SOCKET sock) {
   int status = 0;
 
 #ifdef _WIN32
@@ -54,15 +50,12 @@ int socket_close(SOCKET sock)
   return status;
 }
 
-std::string socket_get_error()
-{
+std::string socket_get_error() {
 #ifdef _WIN32
   int errnum = WSAGetLastError();
   char buf[256] = {0};
-  if (FormatMessage(
-      FORMAT_MESSAGE_FROM_SYSTEM, NULL, errnum, 0, buf,
-      sizeof(buf), NULL) != 0)
-  {
+  if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, errnum, 0, buf,
+                    sizeof(buf), NULL) != 0) {
     return std::string(buf);
   } else {
     return std::string{"Unknown WSA error "} + std::to_string(errnum);
@@ -72,8 +65,7 @@ std::string socket_get_error()
 #endif
 }
 
-bool socket_valid(SOCKET sock)
-{
+bool socket_valid(SOCKET sock) {
 #ifdef _WIN32
   return sock != SOCKET_ERROR;
 #else
@@ -81,8 +73,7 @@ bool socket_valid(SOCKET sock)
 #endif
 }
 
-bool socket_exit()
-{
+bool socket_exit() {
 #ifdef _WIN32
   auto result = WSAGetLastError();
   return result == WSAECONNRESET || result == WSAECONNABORTED ||
@@ -92,8 +83,7 @@ bool socket_exit()
 #endif
 }
 
-int socket_set_non_blocking(SOCKET value)
-{
+int socket_set_non_blocking(SOCKET value) {
 #ifdef _WIN32
   u_long non_blocking_mode = 1;
   return ioctlsocket(value, FIONBIO, &non_blocking_mode);
@@ -102,8 +92,7 @@ int socket_set_non_blocking(SOCKET value)
 #endif
 }
 
-int socket_set_reuse(SOCKET value)
-{
+int socket_set_reuse(SOCKET value) {
 #ifdef _WIN32
   u_long reuse = 1;
   return ioctlsocket(value, SO_REUSEADDR, &reuse);
@@ -113,5 +102,5 @@ int socket_set_reuse(SOCKET value)
 #endif
 }
 
-}  // namespace impl
-}  // namespace ouster
+} // namespace impl
+} // namespace ouster

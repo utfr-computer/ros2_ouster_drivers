@@ -16,19 +16,16 @@
 
 #include "ros2_ouster/ouster_driver.hpp"
 
-namespace ros2_ouster
-{
+namespace ros2_ouster {
 
 /**
  * @brief The default Ouster driver for connecting to, configuring, and reading
  *        data from a real Ouster LiDAR.
  */
-class Driver : public OusterDriver
-{
+class Driver : public OusterDriver {
 public:
   explicit Driver(rclcpp::NodeOptions options);
 };
-
 
 /**
  * @brief An alternative Ouster driver based on the open-source Tins library.
@@ -40,13 +37,11 @@ public:
  *          of the Sensor class. The utilization of the data accumulators and
  *          processor classes is otherwise the same.
  */
-class TinsDriver : public OusterDriver
-{
+class TinsDriver : public OusterDriver {
 public:
   explicit TinsDriver(rclcpp::NodeOptions options);
 };
 
-}  // namespace ros2_ouster
+} // namespace ros2_ouster
 
-
-#endif  // ROS2_OUSTER__DRIVER_TYPES_HPP_
+#endif // ROS2_OUSTER__DRIVER_TYPES_HPP_

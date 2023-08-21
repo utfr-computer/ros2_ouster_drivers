@@ -15,27 +15,25 @@
 #define ROS2_OUSTER__SENSOR_TINS_HPP_
 
 // Libtins includes
+#include <tins/ip_reassembler.h>
 #include <tins/packet.h>
 #include <tins/rawpdu.h>
 #include <tins/sniffer.h>
 #include <tins/tins.h>
 #include <tins/udp.h>
-#include <tins/ip_reassembler.h>
 
-#include <memory>
-#include <vector>
-#include <string>
-#include "ros2_ouster/processors/processor_factories.hpp"
+#include "ros2_ouster/client/client.h"
 #include "ros2_ouster/interfaces/data_processor_interface.hpp"
 #include "ros2_ouster/interfaces/sensor_interface.hpp"
-#include "ros2_ouster/client/client.h"
+#include "ros2_ouster/processors/processor_factories.hpp"
 #include "ros2_ouster/ros2_utils.hpp"
+#include <memory>
+#include <string>
+#include <vector>
 
-namespace sensor
-{
+namespace sensor {
 
-class SensorTins : public ros2_ouster::SensorInterface
-{
+class SensorTins : public ros2_ouster::SensorInterface {
 public:
   /**
    * @brief Default constructor
@@ -52,18 +50,16 @@ public:
    * @param configuration file to use
    * @param node pointer to the driver node, which provides access to ROS params
    */
-  void reset(
-    ros2_ouster::Configuration & config,
-    rclcpp_lifecycle::LifecycleNode::SharedPtr node) override;
+  void reset(ros2_ouster::Configuration &config,
+             rclcpp_lifecycle::LifecycleNode::SharedPtr node) override;
 
   /**
    * @brief Configure lidar sensor
    * @param configuration file to use
    * @param node pointer to the driver node, which provides access to ROS params
    */
-  void configure(
-    ros2_ouster::Configuration & config,
-    rclcpp_lifecycle::LifecycleNode::SharedPtr node) override;
+  void configure(ros2_ouster::Configuration &config,
+                 rclcpp_lifecycle::LifecycleNode::SharedPtr node) override;
 
   /**
    * @brief Get lidar sensor's metadata
@@ -80,30 +76,30 @@ public:
   /**
    * @brief reading a lidar packet
    * @param state of the sensor
-   * @param buf pointer to a buffer to hold the packet data. Must hold getPacketFormat().lidar_packet_size bytes.
+   * @param buf pointer to a buffer to hold the packet data. Must hold
+   * getPacketFormat().lidar_packet_size bytes.
    * @return true if a packet was recieved, false otherwise
    */
-  bool readLidarPacket(
-    const ouster::sensor::client_state & state, uint8_t * buf) override;
+  bool readLidarPacket(const ouster::sensor::client_state &state,
+                       uint8_t *buf) override;
 
   /**
    * @brief reading an imu packet
    * @param state of the sensor
-   * @param buf pointer to a buffer to hold the packet data. Must hold getPacketFormat().imu_packet_size bytes.
+   * @param buf pointer to a buffer to hold the packet data. Must hold
+   * getPacketFormat().imu_packet_size bytes.
    * @return true if a packet was recieved, false otherwise
    */
-  bool readImuPacket(
-    const ouster::sensor::client_state & state, uint8_t * buf) override;
+  bool readImuPacket(const ouster::sensor::client_state &state,
+                     uint8_t *buf) override;
 
   /**
    * @brief Sets the metadata class variable
    * @param lidar_port
    * @param imu_port
    */
-  void setMetadata(
-    int lidar_port,
-    int imu_port,
-    const std::string & timestamp_mode);
+  void setMetadata(int lidar_port, int imu_port,
+                   const std::string &timestamp_mode);
 
   /**
    * @brief Get lidar sensor's packet format
@@ -124,9 +120,8 @@ public:
    *            containing the parameters to load
    * @param[out] sensor_info The metadata to load data into.
    */
-  void loadSensorInfoFromJsonFile(
-    const std::string filepath_to_read,
-    ouster::sensor::sensor_info & sensor_info);
+  void loadSensorInfoFromJsonFile(const std::string filepath_to_read,
+                                  ouster::sensor::sensor_info &sensor_info);
 
   /**
    * @brief Initializes the internal Tins::Sniffer object.
@@ -148,7 +143,7 @@ public:
    *          stop. True if the packets aren't good and we need to continue
    *          looking.
    */
-  bool sniffOnePacket(Tins::Packet & packet);
+  bool sniffOnePacket(Tins::Packet &packet);
 
 private:
   /**
@@ -185,6 +180,6 @@ private:
   Tins::SnifferConfiguration _sniffer_config;
 };
 
-}  // namespace sensor
+} // namespace sensor
 
-#endif  // ROS2_OUSTER__SENSOR_TINS_HPP_
+#endif // ROS2_OUSTER__SENSOR_TINS_HPP_
